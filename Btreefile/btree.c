@@ -79,6 +79,31 @@ static Position Findsibling(Position Parent , int i){
 
     return Sibling;
 }
+static Position Findsiblingkeymin(Position Parent,int i,int *j)
+[
+    int Limit;
+    Position Sibling;
+    Sibling = NULL;
+    Limit = keymin;
+
+    if(i==0){
+        if(Parent->Children[1]->Keynum > Limit){
+            Sibling = Parent->Children[1];
+            *j=1;
+        }
+    }
+    else{
+        if(Parent->Children[i-1]->Keynum > Limit){
+            Sibling = Parent->Children[i-1];
+            *j=i-1;
+        }
+        else if(i+1<Parent->Keynum && Parent->Children[i+1]->Keynum > Limit){
+            Sibling=Parent->Children[i+1];
+            *j=i+1;
+        }
+    }
+    return Sibling;
+]
 
 static Position Insertelement(int iskey ,Position Parent,Position X,Keytype key,int i,int j){
     if(iskey){
@@ -299,13 +324,112 @@ static Position Findremove(BPnode T,Keytype key,int i,BPnode Parent){
         if(j < Limit || key < T->Key[j])
             j--;
     }
+    
+    if(T->Children[0]==NULL)
+        T=Removeelement(1,Parent,T,i,j);
+    else
+        T->Children[j] = Findremove(T->Children[j],key,j,T);
 
+    int Adjust;
+    Adjust=0;
+    if(Parent == NULL && T->Children[0] != NULL && T->Key < 2)
+        Adjust = 1;
+    else if(Parent != NULL && T->Children[0] != NULL && T->Keynum < keymin)
+        Adjust = 1;
+    else if(Parent != NULL && T->Children[0] ==NULL && T->Keynum < keymin)
+        Adjust = 1;
 
+    BPnode Tmp;
+    BPnode Sibling;
+    int j;
+    if(Adjust){
+        if(Parent == NULL)
+           if(T->Children[0] != NULL && T->Keynum < 2){
+            Tmp = T;
+            T = T->Children[0];
+            free(Tmp);
+            return T;
+        }
+        else{
+            Sibling = Findsiblingkeymin(Parent, i,&j);
+            if(Sibling != NULL)
+                Moveelement(Sibling,T,Parent,j,1);
+            else{
+                if(i == 0)
+                    Sibling = Parent->Children[1];
+                else
+                    Sibling = Parent->Children[i-1];
+                Parent = Mergenode(Parent,T,Sibling,i);
+                T = Parent->Children[i];
+            }
+        }
+    }
+    return T;
 }
 
+extern BPnode Remove(BPnode T,Keytype key){
+    return Findremove(T,key,0,NULL);
+}
 
+extern BPnode Destory(BPnode T){
+    int i,j;
+    if(T != NULL){
+        i =0;
+        while(i < T->Keynum+1){
+            Destory(T->Children[i]);
+            i++;
+        }
+        printf("Destory:(");
+        j=0;
+        while(j < T->Keynum)
+            printf("%d:",T->Key[j++]);
+        printf(")");
+        free(T);
+        T = NULL;
+    }
+    return T;
+}
 
+extern void Findtravel(BPnode T,int level){
+    int i;
+    if(T != NULL){
+        printf(" ");
+        printf("level:%d->",level);
+        printf("(");
+        i=0;
+        while(i<T->Keynum)
+            printf("%d:",T->Key[i++]);
+        printff(")");
+        level++;
+        i=0;
+        while(i< T->Keynum+1){
+            Findtravel(T->Children[i],level);
+            i++;
+        }
+    }
+}
 
+extern void Travel(BPnode T){
+    Findtravel(T,0);
+    printf("\n");
+}
+
+extern void Traveldate(BPnode T){
+    Position Tmp;
+    int i;
+    if(T == NULL)
+        return;
+    printf("All date:");
+    Tmp=T;
+    while(Tmp->Children[0] != NULL)
+        Tmp = Tmp->Children[0];
+    while(Tmp != NULL){
+        i=0;
+        while(i<Tmp->Keynum)
+            printf(" %d",Tmp->Key[i++]);
+        Tmp = Tmp->Next;
+    }
+}
 
 
 
