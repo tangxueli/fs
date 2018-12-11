@@ -80,7 +80,7 @@ static Position Findsibling(Position Parent , int i){
     return Sibling;
 }
 
-static Position InsertElement(int iskey ,Position Parent,Position X,Keytype key,int i,int j){
+static Position Insertelement(int iskey ,Position Parent,Position X,Keytype key,int i,int j){
     if(iskey){
         k=X->Keynum -1;
         while(k >= j){
@@ -159,12 +159,150 @@ static Position Moveelement(Position X,Position Y,Position Parent,int i,int n){
         if(X->Children[0]!=NULL){
             while(j<n){
                 Child=X->Children[X->Keynum-1];
-                Removeelement(0,X,Child,)
+                Removeelement(0,X,Child,X->Keynum-1,unvalue);
+                Insertelement(0,Y,Child,unvalue,0,unvalue);
+                j++;
+            }
+        }
+        else{
+            while(j<n){
+                Tmpkey =X->Key[X->Keynum-1];
+                Removeelement(1,Parent,X,i,X->Keynum-1);
+                Insertelement(1,Parent,Y,Tmpkey,i+1,0);
+                j++;
             }
         }
         
     }
+    else{
+        if(X->Children[0]!=NULL){
+            while(j<n){
+            Child=X->Children[0];
+            Removeelement(0,X,Child,0,unvalue);
+            Insertelement(0,Y,Child,unvalue,Y->Keynum,unvalue);
+            j++;
+            }
+        }
+        else{
+            while(j<n){
+                Tmpkey=X->Key[0];
+                Removeelement(1,Parent,X,i,0);
+                Insertelement(1,Parent,Y,Tmpkey,i-1,Y->Keynum);
+                j++;
+            }
+        }
+    }
+
+    return Parent;
 }
+
+static BPnode Splitnode(Position Parent,Position X,int i){
+    Position Newnode;
+    Newnode=Mallocnewnode();
+    int j,k,Limit;
+    Limit=X->Keynum;
+    k=keymin;
+    j=0;
+    while(k<Limit){
+        if(X->Children[0]!=NULL){
+            Newnode->Children[j]=X->Children[k];
+            X->Children[k]=NULL;
+        }
+        Newnode->Key[j]=X->Key[k];
+        X->Key[k]=unvalue;
+        k++;j++;
+        X->Keynum--;Newnode->Keynum++;
+    }
+    if(X->Children[0]==NULL)
+        X->Next=Newnode;
+    if(Parent!=NULL){
+        Insertelement(0,Parent,Newnode,unvalue,i+1,unvalue);
+    }
+    else{
+        Parent=Mallocnewnode();
+        Insertelement(0,Parent,X,unvalue,0,unvalue);
+        Insertelement(0,Parent,Newnode,unvalue,1,unvalue);
+
+        return Parent;
+    }
+    return X;
+}
+static BPnode Mergenode(Position Parent,Position X,Position Y,int i,int j){
+    int Limit;
+    if(Y->Keynum>keymin)
+        Moveelement(Y,X,Parent,j,1);
+    else{
+        Limit=X->Keynum;
+        Moveelement(X,Y,Parent,i,Limit);
+        Removeelement(0,Parent,X,i,unvalue);
+        free(X);
+        X=NULL;
+    }
+    return Parent;
+}
+
+static Position Findinsert(BPnode T,Keytype key, int i,BPnode Parent){
+    int j,Limit;
+    Position Sibling;
+    j=0;
+    while(j<T->Keynum && key >= T->Key[j]){
+        if(key==T->Key[j])
+            return T;
+        j++;
+    }
+    if(j!=0&&T->Children[0]!=NULL)
+        j--;
+    if(T->Children[0] == NULL)
+        T=Insertelement(1,Parent,T,key,i,j);
+    else
+        T->Children[j]=Findinsert(T->Children[j],key,j,T);
+    
+    Limit=M;
+    if(T->Keynum > Limit){
+        if(Parent == NULL){
+            T=Splitnode(Parent,T,i);
+        }
+        else{
+            Sibling=Findsibling(Parent, i);
+            if(Sibling != NULL)
+                Moveelement(T,Sibling,Parent,i,1);
+            else
+                T=Splitnode(Parent,T,i);
+        }
+    }
+
+    if(Parent != NULL)
+        Parent->Key[i]=T->Key[0];
+
+    return T;
+}
+
+static Position Insert(BPnode T,Keytype key){
+    return Findinsert(T,key,0,NULL);
+}
+
+static Position Findremove(BPnode T,Keytype key,int i,BPnode Parent){
+    int j,Limit;
+    j=0;
+    Limit=T->Keynum;
+    while(j<Limit && key >= T->Key[j]){
+        if(key == T->Key[j])
+            break;
+        j++;
+    }
+    if(T->Children[0] == NULL)
+    {
+        if(key != T->Key[j] || j == Limit)
+            return T;        
+    }
+    else{
+        if(j < Limit || key < T->Key[j])
+            j--;
+    }
+
+
+}
+
 
 
 
