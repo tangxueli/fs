@@ -20,7 +20,7 @@ typedef int Keytype;
 struct Bnode{
     int Keynum;
     Keytype key[M];
-    BPnode Children[M+1];
+    BPnode Children[M];
     BPnode Next;
 };
 
