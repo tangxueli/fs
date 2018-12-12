@@ -19,7 +19,7 @@ typedef struct Bnode *BPnode,*Position;
 typedef int Keytype;
 struct Bnode{
     int Keynum;
-    Keytype key[M+1];
+    Keytype Key[M+1];
     BPnode Children[M+1];
     BPnode Next;
 };

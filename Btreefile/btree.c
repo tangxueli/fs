@@ -13,7 +13,7 @@ static Keytype unvalue = INT_MIN;
 static BPnode Mallocnewnode(){
     BPnode Newnode;
     int i;
-    Newnode = malloc(sizeof(struct BPnode));
+    Newnode = (BPnode)malloc(sizeof(struct Bnode));
     if(Newnode == NULL)
         exit(EXIT_FAILURE);
     i=0;
@@ -38,15 +38,15 @@ extern BPnode Initialize(){
         exit(EXIT_FAILURE);
     }
     T = Mallocnewnode();
-
+    
     return T;
 }
 
 //寻找一个节点之下最小Key
 static Position Findmostleft(Position P){
     Position tmp;
-    tmp = p;
-    while(tmp != NULL && tmp->Children[0] != NULL)){
+    tmp = P;
+    while(tmp != NULL && tmp->Children[0] != NULL){
         tmp = tmp->Children[0];
     }
     return tmp;
@@ -54,7 +54,7 @@ static Position Findmostleft(Position P){
 //寻找一个节点之下最大Key
 static Position Findmostright(Position P){
     Position tmp;
-    tem = p;
+    tmp = P;
     while(tmp != NULL && tmp->Children[tmp->Keynum-1] != NULL)
         tmp = tmp->Children[tmp->Keynum-1];
     return tmp;
@@ -80,7 +80,7 @@ static Position Findsibling(Position Parent , int i){
     return Sibling;
 }
 static Position Findsiblingkeymin(Position Parent,int i,int *j)
-[
+{
     int Limit;
     Position Sibling;
     Sibling = NULL;
@@ -103,9 +103,10 @@ static Position Findsiblingkeymin(Position Parent,int i,int *j)
         }
     }
     return Sibling;
-]
+}
 
 static Position Insertelement(int iskey ,Position Parent,Position X,Keytype key,int i,int j){
+    int k;
     if(iskey){
         k=X->Keynum -1;
         while(k >= j){
@@ -302,7 +303,7 @@ static Position Findinsert(BPnode T,Keytype key, int i,BPnode Parent){
     return T;
 }
 
-static Position Insert(BPnode T,Keytype key){
+extern Position Insert(BPnode T,Keytype key){
     return Findinsert(T,key,0,NULL);
 }
 
@@ -332,7 +333,7 @@ static Position Findremove(BPnode T,Keytype key,int i,BPnode Parent){
 
     int Adjust;
     Adjust=0;
-    if(Parent == NULL && T->Children[0] != NULL && T->Key < 2)
+    if(Parent == NULL && T->Children[0] != NULL && T->Keynum < 2)
         Adjust = 1;
     else if(Parent != NULL && T->Children[0] != NULL && T->Keynum < keymin)
         Adjust = 1;
@@ -341,7 +342,6 @@ static Position Findremove(BPnode T,Keytype key,int i,BPnode Parent){
 
     BPnode Tmp;
     BPnode Sibling;
-    int j;
     if(Adjust){
         if(Parent == NULL)
            if(T->Children[0] != NULL && T->Keynum < 2){
@@ -359,7 +359,7 @@ static Position Findremove(BPnode T,Keytype key,int i,BPnode Parent){
                     Sibling = Parent->Children[1];
                 else
                     Sibling = Parent->Children[i-1];
-                Parent = Mergenode(Parent,T,Sibling,i);
+                Parent = Mergenode(Parent,T,Sibling,i,j);
                 T = Parent->Children[i];
             }
         }
@@ -390,7 +390,7 @@ extern BPnode Destory(BPnode T){
     return T;
 }
 
-extern void Findtravel(BPnode T,int level){
+static void Findtravel(BPnode T,int level){
     int i;
     if(T != NULL){
         printf(" ");
@@ -399,7 +399,7 @@ extern void Findtravel(BPnode T,int level){
         i=0;
         while(i<T->Keynum)
             printf("%d:",T->Key[i++]);
-        printff(")");
+        printf(")");
         level++;
         i=0;
         while(i< T->Keynum+1){
