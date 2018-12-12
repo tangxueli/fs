@@ -17,7 +17,7 @@ static BPnode Mallocnewnode(){
     if(Newnode == NULL)
         exit(EXIT_FAILURE);
     i=0;
-    while(i<M)
+    while(i<M+1)
     {
         Newnode->Key[i] = unvalue;
         Newnode->Children[i] = NULL;
@@ -198,6 +198,9 @@ static Position Moveelement(Position X,Position Y,Position Parent,int i,int n){
                 j++;
             }
         }
+        Parent->Key[i+1]=Y->Key[0];
+        if(X->Keynum > 0)
+            Findmostright(X)->Next = Findmostleft(Y);
         
     }
     else{
@@ -217,6 +220,9 @@ static Position Moveelement(Position X,Position Y,Position Parent,int i,int n){
                 j++;
             }
         }
+        Parent->Key[i] = X->Key[0];
+        if(X->Keynum > 0)
+            Findmostright(Y)->Next = Findmostleft(X);
     }
 
     return Parent;
@@ -227,7 +233,7 @@ static BPnode Splitnode(Position Parent,Position X,int i){
     Newnode=Mallocnewnode();
     int j,k,Limit;
     Limit=X->Keynum;
-    k=keymin;
+    k=X->Keynum/2;
     j=0;
     while(k<Limit){
         if(X->Children[0]!=NULL){
@@ -239,8 +245,6 @@ static BPnode Splitnode(Position Parent,Position X,int i){
         k++;j++;
         X->Keynum--;Newnode->Keynum++;
     }
-    if(X->Children[0]==NULL)
-        X->Next=Newnode;
     if(Parent!=NULL){
         Insertelement(0,Parent,Newnode,unvalue,i+1,unvalue);
     }
@@ -356,9 +360,14 @@ static Position Findremove(BPnode T,Keytype key,int i,BPnode Parent){
                 Moveelement(Sibling,T,Parent,j,1);
             else{
                 if(i == 0)
+                {
                     Sibling = Parent->Children[1];
-                else
+                    j=1;
+                }
+                else{
                     Sibling = Parent->Children[i-1];
+                    j=i-1;
+                }
                 Parent = Mergenode(Parent,T,Sibling,i,j);
                 T = Parent->Children[i];
             }
@@ -420,7 +429,6 @@ extern void Traveldate(BPnode T){
     if(T == NULL)
         return;
     printf("All date:");
-    Tmp=T;
     while(Tmp->Children[0] != NULL)
         Tmp = Tmp->Children[0];
     while(Tmp != NULL){
