@@ -22,6 +22,7 @@ struct Bnode{
     Keytype Key[M+1];
     BPnode Children[M+1];
     BPnode Next;
+    BPnode Pro;
 };
 
 extern BPnode Initialize();//初始化

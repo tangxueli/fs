@@ -24,6 +24,7 @@ static BPnode Mallocnewnode(){
         i++;
     }
     Newnode->Next = NULL;
+    Newnode->Pro = NULL;
     Newnode->Keynum = 0;
 
     return Newnode;
@@ -120,11 +121,15 @@ static Position Insertelement(int iskey ,Position Parent,Position X,Keytype key,
         X->Keynum++;
     }
     else{
-        if(X->Children[0]==NULL){
-            if(i>0)
-                Parent->Children[i-1]->Next = X;
-            X->Next = Parent->Children[i];
-        }
+       // if(X->Children[0]==NULL && Parent->Children[i] != NULL){
+         ///   X->Next = Parent->Children[i];
+          //  X->Pro = Parent->Children[i]->Pro;
+         //   if(X->Next != NULL)
+            //    X->Next->Pro = X;
+           // if(X->Pro != NULL)
+           //     X->Pro->Next = X;
+        
+      //  }
         k=Parent->Keynum-1;
         while(k>=i){
             Parent->Children[k+1] = Parent->Children[k];
@@ -153,9 +158,13 @@ static Position Removeelement(int iskey,Position Parent,Position X,int i,int j){
         Parent->Key[i]=X->Key[0];
         X->Keynum--;
     }else{
-        if(X->Children[0]==NULL && i >0){
-            Parent->Children[i-1]->Next=Parent->Children[i+1];
-        }
+       // if(X->Children[0]==NULL){
+        //    Parent->Children[i-1]->Next=Parent->Children[i+1];
+           // if(X->Pro != NULL)
+         //       X->Pro->Next = X-> Next;
+         //   if(X->Next != NULL)
+       //         X->Next->Pro = X->Pro;
+      //  }
         Limit=Parent->Keynum;
         k=i+1;
         while(k<Limit){
@@ -165,8 +174,9 @@ static Position Removeelement(int iskey,Position Parent,Position X,int i,int j){
         }
         Parent->Children[Parent->Keynum-1]=NULL;
         Parent->Key[Parent->Keynum-1]=unvalue;
-        Parent->Keynum++;
+        Parent->Keynum--;
     }
+   // if(X->Keynum == 0)
     return X;
 
 }
@@ -199,8 +209,8 @@ static Position Moveelement(Position X,Position Y,Position Parent,int i,int n){
             }
         }
         Parent->Key[i+1]=Y->Key[0];
-        if(X->Keynum > 0)
-            Findmostright(X)->Next = Findmostleft(Y);
+        //if(X->Keynum > 0)
+         //   Findmostright(X)->Next = Findmostleft(Y);
         
     }
     else{
@@ -221,8 +231,8 @@ static Position Moveelement(Position X,Position Y,Position Parent,int i,int n){
             }
         }
         Parent->Key[i] = X->Key[0];
-        if(X->Keynum > 0)
-            Findmostright(Y)->Next = Findmostleft(X);
+      //  if(X->Keynum > 0)
+       //     Findmostright(Y)->Next = Findmostleft(X);
     }
 
     return Parent;
@@ -230,6 +240,7 @@ static Position Moveelement(Position X,Position Y,Position Parent,int i,int n){
 
 static BPnode Splitnode(Position Parent,Position X,int i){
     Position Newnode;
+    Position tmp;
     Newnode=Mallocnewnode();
     int j,k,Limit;
     Limit=X->Keynum;
@@ -244,6 +255,16 @@ static BPnode Splitnode(Position Parent,Position X,int i){
         X->Key[k]=unvalue;
         k++;j++;
         X->Keynum--;Newnode->Keynum++;
+    }
+    if(X->Children[0]==NULL)
+    {
+        tmp = X->Next;
+        X->Next = Newnode;
+        Newnode->Next = tmp;
+        Newnode->Pro = X;
+        if(tmp != NULL){
+            Newnode->Next->Pro = Newnode;
+        }
     }
     if(Parent!=NULL){
         Insertelement(0,Parent,Newnode,unvalue,i+1,unvalue);
@@ -265,6 +286,17 @@ static BPnode Mergenode(Position Parent,Position X,Position Y,int i,int j){
         Limit=X->Keynum;
         Moveelement(X,Y,Parent,i,Limit);
         Removeelement(0,Parent,X,i,unvalue);
+      //  if(X->Children[0] == NULL)
+      //  {
+       //     X->
+       // }
+        if(X->Children[0]==NULL)
+        {
+            if(X->Next != NULL)
+                X->Next->Pro = X->Pro;
+            if(X->Pro != NULL)
+                X->Pro->Next = X->Next;
+        }
         free(X);
         X=NULL;
     }
@@ -320,14 +352,16 @@ static Position Findremove(BPnode T,Keytype key,int i,BPnode Parent){
             break;
         j++;
     }
+    if(i==0 && key < T->Key[0])
+        return T;
     if(T->Children[0] == NULL)
     {
         if(key != T->Key[j] || j == Limit)
             return T;        
     }
     else{
-        if(j < Limit || key < T->Key[j])
-            j--;
+            if(j == Limit || key < T->Key[j])
+                j--;
     }
     
     if(T->Children[0]==NULL)
@@ -347,12 +381,13 @@ static Position Findremove(BPnode T,Keytype key,int i,BPnode Parent){
     BPnode Tmp;
     BPnode Sibling;
     if(Adjust){
-        if(Parent == NULL)
+        if(Parent == NULL){
            if(T->Children[0] != NULL && T->Keynum < 2){
             Tmp = T;
             T = T->Children[0];
             free(Tmp);
             return T;
+            }
         }
         else{
             Sibling = Findsiblingkeymin(Parent, i,&j);
@@ -400,20 +435,20 @@ extern BPnode Destory(BPnode T){
 }
 
 static void Findtravel(BPnode T,int level){
-    int i;
+    int i,j;
     if(T != NULL){
-        printf(" ");
         printf("level:%d->",level);
         printf("(");
         i=0;
         while(i<T->Keynum)
-            printf("%d:",T->Key[i++]);
+            printf(" %d ",T->Key[i++]);
         printf(")");
         level++;
-        i=0;
-        while(i< T->Keynum+1){
-            Findtravel(T->Children[i],level);
-            i++;
+
+        j=0;
+        while(j < T->Keynum){
+            Findtravel(T->Children[j],level);
+            j++;
         }
     }
 }
@@ -425,17 +460,18 @@ extern void Travel(BPnode T){
 
 extern void Traveldate(BPnode T){
     Position Tmp;
+    Tmp = T;
     int i;
     if(T == NULL)
         return;
     printf("All date:");
     while(Tmp->Children[0] != NULL)
-        Tmp = Tmp->Children[0];
+    Tmp = Tmp->Children[0];
     while(Tmp != NULL){
         i=0;
         while(i<Tmp->Keynum)
             printf(" %d",Tmp->Key[i++]);
-        Tmp = Tmp->Next;
+        Tmp = Tmp->Pro;
     }
 }
 
