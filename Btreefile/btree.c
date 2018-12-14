@@ -471,11 +471,53 @@ extern void Traveldate(BPnode T){
         i=0;
         while(i<Tmp->Keynum)
             printf(" %d",Tmp->Key[i++]);
-        Tmp = Tmp->Pro;
+        Tmp = Tmp->Next;
     }
 }
 
+extern int Getin(BPnode T,int fd){
 
+    Keytype key;
+    printf("从磁盘读入：\n");
+    while(read(fd,&key,sizeof(Keytype)) != 0)
+    {
+        //printf("%d",key);
+        T=Insert(T,key);}
+
+    return 1;
+}
+extern int Putout(BPnode T,int fd){
+    Position Tmp;
+    Tmp = T;
+    int i;
+    int k;
+    k=0;
+    int buf[2048];
+    if(T == NULL)
+        return 0;
+    printf("\n写入磁盘----\n");
+    while(Tmp->Children[0] != NULL)
+        Tmp = Tmp->Children[0];
+    while(Tmp != NULL)
+    {
+        i=0;
+        //printf("\n%d\n",Tmp->Keynum);
+        while(i<Tmp->Keynum){
+          //  printf("1");
+            buf[k]=Tmp->Key[i];
+            k++;
+            if(k%2048 == 0 ){
+                write(fd,buf,2048*sizeof(Keytype));
+                 k=0;
+            }
+        //printf("2");
+        i++;
+        }
+        Tmp = Tmp->Next;        
+    }
+    write(fd,buf,k*sizeof(Keytype));
+    return 1;
+}
 
 
 
