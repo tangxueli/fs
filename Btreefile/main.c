@@ -16,15 +16,15 @@ int main(int argc,const char *argv[]){
     int fd;
     BPnode T;
     T = Initialize();
-    fd =open("./test",O_RDWR); 
+    //fd =open("./test",O_RDWR); 
     clock_t t1=clock();
-    i=99;
-     Getin(T,fd);
-  // while(i>=0 )
-   //{ 
-      //  T = Insert(T,i--);
+    i=10000000;
+    //   Getin(T,fd);
+   while(i>=0 )
+   { 
+        T = Insert(T,i--);
         //Travel(T);
-    //}
+    }
  //   i=20;
    // while(i<40)
    //   {  T = Insert(T,i++);
@@ -36,7 +36,7 @@ int main(int argc,const char *argv[]){
     //Travel(T);      
    //   }
     //Travel(T);
-    Traveldate(T);
+    //Traveldate(T);
     //Putout(T,fd);
     Destory(T);
     clock_t t2=clock();
