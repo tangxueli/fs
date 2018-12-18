@@ -18,11 +18,11 @@ int main(int argc,const char *argv[]){
     T = Initialize();
     //fd =open("./test",O_RDWR); 
     clock_t t1=clock();
-    i=10000000;
+    i=0;
     //   Getin(T,fd);
-   while(i>=0 )
+   while(i <= 20000000 )
    { 
-        T = Insert(T,i--);
+        T = Insert(T,i++);
         //Travel(T);
     }
  //   i=20;
@@ -36,9 +36,9 @@ int main(int argc,const char *argv[]){
     //Travel(T);      
    //   }
     //Travel(T);
-    //Traveldate(T);
+   // Traveldate(T);
     //Putout(T,fd);
-    Destory(T);
+    //Destory(T);
     clock_t t2=clock();
 
     printf("\n用时：%lu秒\n",(t2-t1)/CLOCKS_PER_SEC);
